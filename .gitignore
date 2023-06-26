@@ -1,0 +1,9 @@
+# Ignore .env file in the ujuzi folder
+/ujuzi/.env
+
+# Ignore the migrations folder of the accounts app
+/accounts/migrations/
+
+# Ignore the __pycache__ folders of both ujuzi and accounts
+/ujuzi/__pycache__/
+/accounts/__pycache__/
