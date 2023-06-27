@@ -100,11 +100,11 @@ WSGI_APPLICATION = 'sign_me_up.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ujuzidb',
-        'USER': 'ujuzi',
-        'PASSWORD': 'ujuzi',
-        #'HOST': 'localhost',
-        #'PORT': '5431',
+        'NAME': os.getenv('NAME'),
+        'USER': os.getenv('USER'),
+        'PASSWORD': os.getenv('PASSWORD'),
+        # 'HOST': os.getenv('HOST'),
+        # 'PORT': os.getenv('PORT'),
     }
 }
 
