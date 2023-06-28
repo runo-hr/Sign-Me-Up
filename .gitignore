@@ -7,3 +7,5 @@
 # Ignore the __pycache__ folders of both ujuzi and accounts
 /sign_me_up/__pycache__/
 /accounts/__pycache__/
+
+random.md

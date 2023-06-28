@@ -82,8 +82,34 @@ class VerifyEmailView(APIView):
 
 class UserLoginView(APIView):
     def post(self, request):
-        # Implement logic for user login and token generation
-        pass
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        # Validate username and password
+        if not username or not password:
+            return Response({'message': 'Username and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Authenticate user
+        user = User.objects.filter(username=username).first()
+        if not user or not user.check_password(password):
+            return Response({'message': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Generate token
+        token = self.generate_token(user)
+
+        # Return token and user details
+        serializer = UserSerializer(user)
+        data = {
+            'token': token,
+            'user': serializer.data
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
+    def generate_token(self, user):
+        # Generate token for user
+        token_generator = default_token_generator
+        token = token_generator.make_token(user)
+        return token
 
 class UserProfileView(APIView):
     def get(self, request):
