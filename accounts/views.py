@@ -1,7 +1,8 @@
 # accounts/views.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, authentication, permissions
+from rest_framework.authtoken.models import Token
 
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -13,7 +14,7 @@ from django.contrib.sites.shortcuts import get_current_site
 
 
 from accounts.serializers import UserSerializer
-from accounts.models import User
+from accounts.models import CustomUser as User
 
 class UserRegistrationView(APIView):
     def post(self, request):
@@ -108,9 +109,10 @@ class UserLoginView(APIView):
 
     def generate_token(self, user):
         # Generate token for user
-        token_generator = default_token_generator
-        token = token_generator.make_token(user)
-        return token
+        #token_generator = default_token_generator
+        #token = token_generator.make_token(user)
+        token = Token.objects.create(user=user)
+        return token.key
 
 class UserProfileView(APIView):
     def get(self, request):
