@@ -57,3 +57,22 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
     
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
+    avatar = models.ImageField(upload_to='avatars/', blank=True)
+    bio = models.TextField(max_length=500, blank=True)
+    
+    location = models.CharField(max_length=100, blank=True)
+    contact_number = models.CharField(max_length=20, blank=True)
+
+    website = models.URLField(blank=True)
+    facebook = models.URLField(blank=True)
+    twitter = models.URLField(blank=True)
+    instagram = models.URLField(blank=True)
+    tiktok = models.URLField(blank=True)
+    linkedin = models.URLField(blank=True)
+    youtube = models.URLField(blank=True)
+    
+    def __str__(self):
+        return self.user.username

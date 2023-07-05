@@ -4,6 +4,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 
 from accounts.models import CustomUser as User
+from accounts.models import UserProfile
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -54,3 +55,9 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['avatar', 'bio', 'location', 'contact_number', 'website', 'facebook', 'twitter', 'instagram', 'tiktok', 'linkedin', 'youtube']

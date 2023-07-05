@@ -9,12 +9,16 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.urls import reverse
 from django.core.mail import EmailMessage
+from django.contrib.auth import authenticate
+
 #from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 
 
-from accounts.serializers import UserSerializer
+from accounts.serializers import UserSerializer, UserProfileSerializer
 from accounts.models import CustomUser as User
+from accounts.models import UserProfile
+
 
 class UserRegistrationView(APIView):
     def post(self, request):
@@ -96,6 +100,10 @@ class UserLoginView(APIView):
         if not user or not user.check_password(password):
             return Response({'message': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
 
+         # Update is_active to True
+        user.is_active = True
+        user.save()
+
         # Generate token
         token = self.generate_token(user)
 
@@ -107,18 +115,30 @@ class UserLoginView(APIView):
         }
         return Response(data, status=status.HTTP_200_OK)
 
-    def generate_token(self, user):
-        # Generate token for user
-        #token_generator = default_token_generator
-        #token = token_generator.make_token(user)
+    def generate_token(self, user):       
         token = Token.objects.create(user=user)
         return token.key
 
 class UserProfileView(APIView):
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request):
         # Implement logic to retrieve user profile
-        pass
+        try:
+            profile = request.user.profile
+            serializer = UserProfileSerializer(profile)
+            return Response(serializer.data)
+        except UserProfile.DoesNotExist:
+            return Response({'message': 'User profile does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+
 
     def put(self, request):
         # Implement logic to update user profile
-        pass
+        profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+        serializer = UserProfileSerializer(profile, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
