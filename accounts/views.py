@@ -116,7 +116,7 @@ class UserLoginView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
     def generate_token(self, user):       
-        token = Token.objects.create(user=user)
+        token, created = Token.objects.get_or_create(user=user)
         return token.key
 
 class UserProfileView(APIView):
