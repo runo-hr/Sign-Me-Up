@@ -1,4 +1,5 @@
 # accounts/views.py
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, authentication, permissions
@@ -23,7 +24,15 @@ from accounts.models import UserProfile
 class GlobalFunctions:
     @staticmethod
     def generate_email_verification_token(user):
-        # Generate a unique email verification token for the user
+        """
+        Generates a unique email verification token for the user.
+
+        Args:
+            user (User): The user for whom the token is generated.
+
+        Returns:
+            str: The generated email verification token.
+        """
         token_generator = default_token_generator
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = token_generator.make_token(user)
@@ -33,6 +42,15 @@ class GlobalFunctions:
 
     @staticmethod
     def send_verification_email(request, email, verification_token, username):
+        """
+        Sends a verification email to the user.
+
+        Args:
+            request (HttpRequest): The current request.
+            email (str): The email address of the user.
+            verification_token (str): The verification token.
+            username (str): The username of the user.
+        """
         current_site = get_current_site(request)
         verification_url = reverse('verify-email')
         absolute_url = f"http://{current_site.domain}{verification_url}?token={verification_token}"
@@ -45,18 +63,35 @@ class GlobalFunctions:
 
     @staticmethod
     def generate_token(user):
+        """
+        Generates a token for the user.
+
+        Args:
+            user (User): The user for whom the token is generated.
+
+        Returns:
+            str: The generated token.
+        """
         token, created = Token.objects.get_or_create(user=user)
         return token.key
 
 
 class UserRegistrationView(APIView):
     def post(self, request):
+        """
+        Handles the registration of a new user.
+
+        Args:
+            request (HttpRequest): The current request.
+
+        Returns:
+            Response: The response containing the registration status.
+        """
         serializer = UserSerializer(data=request.data)
         
         if serializer.is_valid():
             user = serializer.save()
 
-             # Generate email verification token and send email
             verification_token = GlobalFunctions.generate_email_verification_token(user)
             GlobalFunctions.send_verification_email(request, user.email, verification_token, user.username)
 
@@ -71,6 +106,15 @@ class UserRegistrationView(APIView):
 
 class VerifyEmailView(APIView):
     def get(self, request):
+        """
+        Verifies the user's email address.
+
+        Args:
+            request (HttpRequest): The current request.
+
+        Returns:
+            Response: The response containing the verification status and token.
+        """
         token = request.GET.get('token')
 
         try:
@@ -79,12 +123,10 @@ class VerifyEmailView(APIView):
             user = User.objects.get(pk=uid)
 
             if default_token_generator.check_token(user, token):
-                # Mark the email as verified
                 user.email_verified = True
                 user.is_active = True
                 user.save()
 
-                 # Generate token for the user
                 token = GlobalFunctions.generate_token(user)
 
                 return Response({
@@ -109,22 +151,27 @@ class VerifyEmailView(APIView):
 
 class UserLoginView(APIView):
     def post(self, request):
+        """
+        Handles user authentication and token generation.
+
+        Args:
+            request (HttpRequest): The current request.
+
+        Returns:
+            Response: The response containing the authentication status and token.
+        """
         username = request.data.get('username')
         password = request.data.get('password')
 
-        # Validate username and password
         if not username or not password:
             return Response({'message': 'Username and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Authenticate user
         user = User.objects.filter(username=username).first()
         if not user or not user.check_password(password):
             return Response({'message': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # Generate token for the user
         token = GlobalFunctions.generate_token(user)
 
-        # Return token and user details
         serializer = UserSerializer(user)
         data = {
             'token': token,
@@ -135,12 +182,19 @@ class UserLoginView(APIView):
 
 class UserLogoutView(APIView):
     def post(self, request):
-        # Get the token from the request headers
+        """
+        Logs out the user by deleting the authentication token.
+
+        Args:
+            request (HttpRequest): The current request.
+
+        Returns:
+            Response: The response indicating the logout status.
+        """
         auth_header = request.headers.get('Authorization')
         if auth_header:
             token_key = auth_header.split(' ')[1]
             try:
-                # Find the token and delete it
                 token = Token.objects.get(key=token_key)
                 token.delete()
                 return Response({'message': 'Logged out successfully.'}, status=status.HTTP_200_OK)
@@ -156,13 +210,29 @@ class UserProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        # Implement logic to retrieve user profile
+        """
+        Retrieves the user's profile.
+
+        Args:
+            request (HttpRequest): The current request.
+
+        Returns:
+            Response: The response containing the user's profile data.
+        """
         profile, created = UserProfile.objects.get_or_create(user=request.user)
         serializer = UserProfileSerializer(profile)
         return Response(serializer.data)
         
     def put(self, request):
-        # Implement logic to update user profile
+        """
+        Updates the user's profile.
+
+        Args:
+            request (HttpRequest): The current request.
+
+        Returns:
+            Response: The response containing the updated profile data or error messages.
+        """
         profile, created = UserProfile.objects.get_or_create(user=request.user)
 
         serializer = UserProfileSerializer(profile, data=request.data)
