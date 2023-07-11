@@ -121,8 +121,8 @@ class UserLoginView(APIView):
         if not user or not user.check_password(password):
             return Response({'message': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # Generate token
-        token = self.generate_token(user)
+        # Generate token for the user
+        token = GlobalFunctions.generate_token(user)
 
         # Return token and user details
         serializer = UserSerializer(user)
@@ -132,10 +132,22 @@ class UserLoginView(APIView):
         }
         return Response(data, status=status.HTTP_200_OK)
 
-    def generate_token(self, user):       
-        token, created = Token.objects.get_or_create(user=user)
-        return token.key
 
+class UserLogoutView(APIView):
+    def post(self, request):
+        # Get the token from the request headers
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            token_key = auth_header.split(' ')[1]
+            try:
+                # Find the token and delete it
+                token = Token.objects.get(key=token_key)
+                token.delete()
+                return Response({'message': 'Logged out successfully.'}, status=status.HTTP_200_OK)
+            except Token.DoesNotExist:
+                return Response({'message': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'message': 'No token provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
     
@@ -145,13 +157,10 @@ class UserProfileView(APIView):
 
     def get(self, request):
         # Implement logic to retrieve user profile
-        try:
-            profile = request.user.profile
-            serializer = UserProfileSerializer(profile)
-            return Response(serializer.data)
-        except UserProfile.DoesNotExist:
-            return Response({'message': 'User profile does not exist.'}, status=status.HTTP_404_NOT_FOUND)
-
+        profile, created = UserProfile.objects.get_or_create(user=request.user)
+        serializer = UserProfileSerializer(profile)
+        return Response(serializer.data)
+        
     def put(self, request):
         # Implement logic to update user profile
         profile, created = UserProfile.objects.get_or_create(user=request.user)
