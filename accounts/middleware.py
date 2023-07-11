@@ -19,13 +19,9 @@ class TokenExpirationMiddleware:
             print(f'token_key: {token_key}')
             try:
                 token = Token.objects.get(key=token_key)
-                user = User.objects.get(pk=token.user_id)
 
-                if token.created < timezone.now() - timezone.timedelta(seconds=10):
+                if token.created < timezone.now() - timezone.timedelta(hours=10):
                     token.delete() # Token has expired, delete it
-                    user.is_active = False # Update is_active to False
-                    user.save()
-
                     response_data = {'message': 'Token has expired. Please log in again.'}
                     return JsonResponse(response_data, status=401)
                 else:
