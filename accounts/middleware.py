@@ -13,10 +13,8 @@ class TokenExpirationMiddleware:
 
     def __call__(self, request):
         if 'Authorization' in request.headers:
-            print('Authorized')
             auth_header = request.headers['Authorization']
             token_key = auth_header.split(' ')[1]  # Extract the token from the Authorization header
-            print(f'token_key: {token_key}')
             try:
                 token = Token.objects.get(key=token_key)
 

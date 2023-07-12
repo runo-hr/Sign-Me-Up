@@ -72,7 +72,7 @@ MIDDLEWARE = [
     
 ]
 
-ROOT_URLCONF = 'sign_me_up.urls'
+ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
     {
@@ -90,7 +90,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'sign_me_up.wsgi.application'
+WSGI_APPLICATION = 'core.wsgi.application'
 
 
 # Database

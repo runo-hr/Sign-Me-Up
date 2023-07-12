@@ -1,11 +1,11 @@
 # Ignore .env file in the ujuzi folder
-/sign_me_up/.env
+/core/.env
 
 # Ignore the migrations folder of the accounts app
 /accounts/migrations/
 
 # Ignore the __pycache__ folders of both ujuzi and accounts
-/sign_me_up/__pycache__/
+/core/__pycache__/
 /accounts/__pycache__/
 
 random.md
