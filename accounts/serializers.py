@@ -53,6 +53,15 @@ class UserSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        """
+        Create a new user.
+
+        Args:
+            validated_data (dict): The validated user data.
+
+        Returns:
+            User: The newly created user.
+        """
         user = User.objects.create_user(**validated_data)
         return user
 

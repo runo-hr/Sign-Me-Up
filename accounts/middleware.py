@@ -20,7 +20,7 @@ class TokenExpirationMiddleware:
             try:
                 token = Token.objects.get(key=token_key)
 
-                if token.created < timezone.now() - timezone.timedelta(hours=10):
+                if token.created < timezone.now() - timezone.timedelta(days=5):
                     token.delete() # Token has expired, delete it
                     response_data = {'message': 'Token has expired. Please log in again.'}
                     return JsonResponse(response_data, status=401)
