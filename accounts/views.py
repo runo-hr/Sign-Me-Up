@@ -197,7 +197,7 @@ class UserLogoutView(APIView):
             try:
                 token = Token.objects.get(key=token_key)
                 token.delete()
-                return Response({'message': 'Logged out successfully.'}, status=status.HTTP_200_OK)
+                return Response({'message': 'Logged out successfully.'}, status=status.HTTP_204_NO_CONTENT)
             except Token.DoesNotExist:
                 return Response({'message': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
         else:
