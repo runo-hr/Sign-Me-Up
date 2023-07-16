@@ -1,13 +1,14 @@
-from django.test import TestCase
 from rest_framework.test import APITestCase
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 
+from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
 from accounts.models import UserProfile
 from accounts.views import GlobalFunctions
+from accounts.serializers import UserSerializer, UserProfileSerializer
 
 User = get_user_model()
 
@@ -157,3 +158,98 @@ class UserProfileViewTestCase(APITestCase):
 
 # Optional: Add more test cases to cover edge cases and additional functionality
 
+
+
+
+
+
+
+# Test cases for serializers.py
+class UserSerializerTestCase(TestCase):
+    """
+    Test case for UserSerializer.
+    """
+    def test_user_serializer_validation(self):
+        """
+        Test user serializer validation.
+        """
+        serializer = UserSerializer(data={
+            'username': 'testuser',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'email': 'test@example.com',
+            'password': 'testpassbrock',
+            'confirm_password': 'testpassbrock'
+        })
+        self.assertTrue(serializer.is_valid())
+
+    def test_user_serializer_creation(self):
+        """
+        Test user serializer creation.
+        """
+        serializer = UserSerializer(data={
+            'username': 'testuser',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'email': 'test@example.com',
+            'password': 'testpassbrock',
+            'confirm_password': 'testpassbrock'
+        })
+        self.assertTrue(serializer.is_valid())
+        user = serializer.save()
+        self.assertIsInstance(user, User)
+        self.assertEqual(user.username, 'testuser')
+        # Add more assertions as needed
+
+class UserProfileSerializerTestCase(TestCase):
+    """
+    Test case for UserProfileSerializer.
+    """
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='testpass', first_name='Test', last_name='User')
+
+    def test_user_profile_serializer(self):
+        """
+        Test user profile serializer.
+        """
+        profile = UserProfile.objects.create(user=self.user, bio='Test bio', location='Test location')
+        serializer = UserProfileSerializer(profile)
+        self.assertEqual(serializer.data['bio'], 'Test bio')
+        self.assertEqual(serializer.data['location'], 'Test location')
+        # Add more assertions as needed
+
+
+
+
+
+
+# Test cases for models.py
+class CustomUserModelTestCase(TestCase):
+    """
+    Test case for CustomUser model.
+    """
+    def test_custom_user_creation(self):
+        """
+        Test custom user creation.
+        """
+        user = User.objects.create_user(username='testuser', email='test@example.com', password='testpass', first_name='Test', last_name='User')
+        self.assertIsInstance(user, User)
+        self.assertEqual(user.username, 'testuser')
+        # Add more assertions as needed
+
+class UserProfileModelTestCase(TestCase):
+    """
+    Test case for UserProfile model.
+    """
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='testpass', first_name='Test', last_name='User')
+
+    def test_user_profile_creation(self):
+        """
+        Test user profile creation.
+        """
+        profile = UserProfile.objects.create(user=self.user, bio='Test bio', location='Test location')
+        self.assertIsInstance(profile, UserProfile)
+        self.assertEqual(profile.bio, 'Test bio')
+        self.assertEqual(profile.location, 'Test location')
+        # Add more assertions as needed
