@@ -91,6 +91,8 @@ class UserRegistrationView(APIView):
         
         if serializer.is_valid():
             user = serializer.save()
+            # Create a user profile
+            UserProfile.objects.create(user=user)
 
             verification_token = GlobalFunctions.generate_email_verification_token(user)
             GlobalFunctions.send_verification_email(request, user.email, verification_token, user.username)
@@ -240,3 +242,25 @@ class UserProfileView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class UserDeleteView(APIView):
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request):
+        """
+        Deletes the user's account.
+
+        Args:
+            request (HttpRequest): The current request.
+
+        Returns:
+            Response: The response indicating the account deletion status.
+        """
+        user = request.user
+        user_profile = UserProfile.objects.get(user=user)
+        user_profile.delete()
+        user.delete()
+        return Response({'message': 'Account deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)

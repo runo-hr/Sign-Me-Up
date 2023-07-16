@@ -156,6 +156,49 @@ class UserProfileViewTestCase(APITestCase):
         self.assertEqual(response.data['location'], 'Test City')
         self.assertEqual(response.data['contact_number'], '1234567890')
 
+
+
+class UserDeleteViewTestCase(APITestCase):
+    """
+    Test case for UserDeleteView.
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass',
+            first_name='Test',
+            last_name='User'
+        )
+        self.profile = UserProfile.objects.create(user=self.user)
+        self.token = Token.objects.create(user=self.user)
+
+    def test_delete_user(self):
+        """
+        Test deleting the user account.
+        """
+        url = reverse('user-delete')
+
+        # Set the Authorization header with the user's token
+        headers = {'Authorization': f'Token {self.token.key}'}
+
+        # Authenticate the test client with the user's token
+        self.client.force_authenticate(user=self.user)
+
+        # Make the DELETE request to delete the user account
+        response = self.client.delete(url, headers=headers)
+
+        # Check the response status code
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Verify that the user and profile are deleted from the database
+        self.assertFalse(User.objects.filter(pk=self.user.pk).exists())
+        self.assertFalse(UserProfile.objects.filter(user=self.user).exists())
+
+        # Verify that the token is deleted or invalidated
+        self.assertFalse(Token.objects.filter(key=self.token.key).exists())
+
 # Optional: Add more test cases to cover edge cases and additional functionality
 
 
