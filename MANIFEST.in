@@ -1,0 +1,2 @@
+recursive-exclude signmeup/accounts/migrations *
+recursive-exclude signmeup/core/.env
